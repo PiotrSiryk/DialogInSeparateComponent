@@ -1,0 +1,151 @@
+<template>
+  <div class="layout-container">
+    <div v-for="cashRegister in mockData" :key="cashRegister.id">
+      <div
+        class="cash-register"
+        :style="{ top: `${cashRegister.y}px`, left: `${cashRegister.x}px` }"
+        @drag="test"
+        @dragend="testend"
+      >
+        crnr : {{ cashRegister.crnr }}
+      </div>
+
+      <div
+        v-for="device in cashRegister.devices"
+        :key="device.deviceId"
+        class="device"
+        :style="{ top: `${device.y}px`, left: `${device.x}px` }"
+      >
+        {{ device.name }}
+      </div>
+      <svg>
+        <line
+          :x1="cashRegister.x"
+          :y1="cashRegister.y"
+          :x2="device.x"
+          :y2="device.y"
+          stroke="red"
+          v-for="device in cashRegister.devices"
+          :key="JSON.stringify(device)"
+        />
+      </svg>
+      <svg>
+        <line
+          :x1="connection.first.x"
+          :y1="connection.first.y"
+          :x2="connection.second.x"
+          :y2="connection.second.y"
+          stroke="black"
+          v-for="connection in connections"
+          :key="JSON.stringify(connection)"
+        />
+      </svg>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent, ref } from '@vue/composition-api';
+
+export default defineComponent({
+  name: 'Home',
+
+  setup() {
+    const mockData = [
+      {
+        id: 1,
+        crnr: 1,
+        x: 150,
+        y: 100,
+        devices: [
+          { name: 'test1', deviceId: 111, x: 240, y: 130 },
+          { name: 'test2', deviceId: 122, x: 130, y: 200, connectTo: 322 },
+          { name: 'test3', deviceId: 133, x: 40, y: 80, connectTo: 322 }
+        ]
+      },
+      {
+        id: 2,
+        crnr: 2,
+        x: 650,
+        y: 270,
+        devices: [
+          { name: 'second1', deviceId: 211, x: 600, y: 200 },
+          { name: 'second2', deviceId: 222, x: 690, y: 370 },
+          { name: 'second3', deviceId: 233, x: 555, y: 360, connectTo: 111 }
+        ]
+      },
+      {
+        id: 3,
+        crnr: 3,
+        x: 180,
+        y: 500,
+        devices: [
+          { name: 'third1', deviceId: 311, x: 290, y: 500 },
+          { name: 'third2', deviceId: 322, x: 110, y: 400 },
+          { name: 'third3', deviceId: 333, x: 80, y: 530 }
+        ]
+      }
+    ];
+    const connections = ref([]);
+    const devices = ref([]);
+    function test(e) {
+      /* console.log('test'); */
+    }
+    function testend(e) {
+      console.log(e);
+    }
+
+    mockData.forEach((el) => {
+      el.devices.forEach((device) => {
+        devices.value.push(device);
+      });
+    });
+    devices.value.forEach((device) => {
+      if (device.connectTo) {
+        const endPoint = devices.value.find(
+          (el) => el.deviceId === device.connectTo
+        );
+        connections.value.push({ first: device, second: endPoint });
+      }
+    });
+
+    return { mockData, connections, test, testend };
+  }
+});
+</script>
+
+<style lang='scss'>
+.layout-container {
+  width: 900px;
+  height: 600px;
+  background: #abc;
+  position: relative;
+  div > svg {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+  }
+}
+.cash-register {
+  position: absolute;
+  width: 80px;
+  height: 60px;
+  background: white;
+  border: 1px solid orange;
+  border-radius: 10px;
+  z-index: 5;
+}
+.device {
+  position: absolute;
+  width: 80px;
+  height: 60px;
+  background: lightblue;
+  border: 1px solid orange;
+  border-radius: 10px;
+  z-index: 5;
+}
+</style>
+
+
